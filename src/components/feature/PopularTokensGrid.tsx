@@ -87,7 +87,7 @@ const PopularTokensGrid: React.FC<Props> = ({ popularTokens, setPayModalToken })
         {tokensWithPrices.slice(0, 16).map((token) => (
           <div
             key={token.symbol}
-            className="bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg p-6 flex flex-col justify-between min-h-[220px] transition-shadow hover:shadow-lg cursor-pointer relative"
+            className="bg-[#121212] border border-[#1F1F1F] rounded-lg p-6 flex flex-col justify-between min-h-[220px] transition-shadow hover:shadow-lg cursor-pointer relative"
             style={{ borderRadius: 8, borderWidth: 1, borderStyle: 'solid', borderColor: '#1F1F1F' }}
           >
             <Link
