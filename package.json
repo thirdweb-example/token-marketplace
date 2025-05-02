@@ -1,0 +1,51 @@
+{
+  "name": "thirdweb-token-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A modern, black-themed token marketplace and cross-chain bridge built with Next.js, React, Tailwind CSS, and the thirdweb SDK.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_GITHUB_USERNAME/thirdweb-token-marketplace.git"
+  },
+  "homepage": "https://github.com/YOUR_GITHUB_USERNAME/thirdweb-token-marketplace",
+  "author": "YOUR NAME",
+  "license": "MIT",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.0",
+    "@radix-ui/react-tabs": "^1.1.4",
+    "@radix-ui/react-tooltip": "^1.2.0",
+    "chart.js": "^4.4.9",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "keen-slider": "^6.8.6",
+    "lightweight-charts": "^5.0.6",
+    "lucide-react": "^0.487.0",
+    "next": "14.1.0",
+    "react": "^18.3",
+    "react-chartjs-2": "^5.3.0",
+    "react-dom": "^18.3",
+    "react-tradingview-embed": "^3.0.6",
+    "recharts": "^2.15.3",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss-animate": "^1.0.7",
+    "thirdweb": "^5.96.6"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.1.0",
+    "pino-pretty": "^13.0.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  }
+}
