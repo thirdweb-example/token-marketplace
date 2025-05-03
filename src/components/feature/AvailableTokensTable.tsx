@@ -71,7 +71,7 @@ const AvailableTokensTable: React.FC<Props> = ({
             </span>
             <input
               type="text"
-              placeholder="Any asset or token"
+              placeholder="Search by name, symbol, or address"
               className="w-full pl-10 pr-4 py-2 rounded-md bg-[#171717] text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#333] focus:border-[#333] transition-all border border-transparent"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
@@ -94,7 +94,7 @@ const AvailableTokensTable: React.FC<Props> = ({
             variant="outline"
             size="icon"
             onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-            disabled={currentPage === 1}
+            disabled={currentPage === 1 || loading}
             className="border-[#222] text-gray-300 hover:text-white hover:bg-[#111] hover:border-white disabled:opacity-50 transition-all duration-200"
             aria-label="Previous page"
           >
@@ -102,14 +102,14 @@ const AvailableTokensTable: React.FC<Props> = ({
           </Button>
           <div className="flex items-center px-4 py-2 rounded-md bg-[#111] border border-[#222]">
             <span className="text-sm text-gray-300">
-              Page {currentPage} 
+              Page {currentPage} of {totalPages}
             </span>
           </div>
           <Button
             variant="outline"
             size="icon"
             onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || loading}
             className="border-[#222] text-gray-300 hover:text-white hover:bg-[#111] hover:border-white disabled:opacity-50 transition-all duration-200"
             aria-label="Next page"
           >
@@ -118,11 +118,22 @@ const AvailableTokensTable: React.FC<Props> = ({
         </div>
       </div>
       {error ? (
-        <div className="text-center py-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#111] mb-4">
-            <RefreshCwIcon className="h-8 w-8 text-white" />
+        <div className="text-center py-8 bg-[#111] rounded-lg border border-[#222] p-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#171717] mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
+              <path d="M12 16V16.01M12 8V12M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </div>
-          <p className="text-white text-lg">{error}</p>
+          <p className="text-white text-lg mb-2">{error}</p>
+          <p className="text-gray-400 text-sm max-w-md mx-auto">
+            {searchTerm ? 'Try adjusting your search term or refresh to see all tokens.' : 'Please try refreshing to fetch tokens again.'}
+          </p>
+          <Button 
+            onClick={refreshRoutes} 
+            className="mt-4 bg-[#222] hover:bg-[#333] text-white"
+          >
+            <RefreshCwIcon className="h-4 w-4 mr-2" /> Refresh
+          </Button>
         </div>
       ) : loading ? (
         <div className="overflow-x-auto">
@@ -166,7 +177,7 @@ const AvailableTokensTable: React.FC<Props> = ({
                     <td className="px-6 py-4">
                       <Skeleton className="h-4 w-16 bg-[#222]" />
                     </td>
-                    {/* TODO */}
+                    {/* 24h change */}
                     <td className="px-6 py-4">
                       <Skeleton className="h-4 w-12 bg-[#222] rounded-full" />
                     </td>
@@ -185,6 +196,24 @@ const AvailableTokensTable: React.FC<Props> = ({
                 ))}
             </tbody>
           </table>
+        </div>
+      ) : sortedTokens.length === 0 ? (
+        <div className="text-center py-8 bg-[#111] rounded-lg border border-[#222] p-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#171717] mb-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
+              <path d="M12 16V16.01M12 8V12M12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <p className="text-white text-lg mb-2">No tokens found matching your criteria</p>
+          <p className="text-gray-400 text-sm max-w-md mx-auto">
+            Try adjusting your search term or refresh to see all available tokens.
+          </p>
+          <Button 
+            onClick={refreshRoutes} 
+            className="mt-4 bg-[#222] hover:bg-[#333] text-white"
+          >
+            <RefreshCwIcon className="h-4 w-4 mr-2" /> Reset filters
+          </Button>
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -210,7 +239,7 @@ const AvailableTokensTable: React.FC<Props> = ({
                 const tokenUrl = `/swap?token=${encodeURIComponent(token.symbol)}&name=${encodeURIComponent(token.name)}&chainId=${token.chainId}&address=${encodeURIComponent(token.address)}&iconUrl=${encodeURIComponent(token.iconUri || "")}`;
                 return (
                   <tr
-                    key={idx}
+                    key={`${token.symbol}_${token.chainId}_${token.address}_${idx}`}
                     className="border-t border-[#1F1F1F] hover:bg-[#222] transition-all duration-200 cursor-pointer group"
                     onClick={() => window.location.href = tokenUrl}
                   >
@@ -233,7 +262,7 @@ const AvailableTokensTable: React.FC<Props> = ({
                         <div className="font-semibold text-white leading-tight">
                           {token.name} ({token.symbol})
                         </div>
-                        <div className="text-xs text-gray-400 leading-tight">
+                        <div className="text-xs text-gray-400 leading-tight truncate max-w-[250px]">
                           {token.address === NATIVE_TOKEN_ADDRESS ? "Native Token" : token.address}
                         </div>
                       </div>
@@ -244,7 +273,7 @@ const AvailableTokensTable: React.FC<Props> = ({
                     <td className="px-6 py-4 text-white font-mono">
                       {typeof token.price_usd === 'number' ? `$${token.price_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}` : '--'}
                     </td>
-                    {/* TODO */}
+                    {/* 24h Change */}
                     <td className="px-6 py-4">
                       {typeof token.percent_change_24h === 'number' ? (
                         <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${token.percent_change_24h >= 0 ? 'bg-green-900/60 text-green-400' : 'bg-red-900/60 text-red-400'}`}>
@@ -266,8 +295,8 @@ const AvailableTokensTable: React.FC<Props> = ({
                             setPayModalToken({
                               name: token.name,
                               symbol: token.symbol,
-                              price: 0,
-                              change24h: 0,
+                              price: token.price_usd || 0,
+                              change24h: token.percent_change_24h || 0,
                               icon: token.iconUri || "",
                               chainId: token.chainId,
                               address: token.address,

@@ -1,16 +1,26 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThirdwebProvider } from "thirdweb/react";
 import Footer from "@/components/Footer";
+import { client } from "./client";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
-  title: "thirdweb SDK + Next starter",
-  description:
-    "Starter template for using thirdweb SDK with Next.js App router",
-};
+// Metadata is not available in client components, so we'll define it separately
+
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 
 export default function RootLayout({
   children,
@@ -20,10 +30,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThirdwebProvider>
-          {children}
-          <Footer />
-        </ThirdwebProvider>
+        <QueryClientProvider client={queryClient}>
+          <ThirdwebProvider>
+            {children}
+            <Footer />
+          </ThirdwebProvider>
+        </QueryClientProvider>
       </body>
     </html>
   );

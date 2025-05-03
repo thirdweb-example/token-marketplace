@@ -34,7 +34,7 @@ export default function PayEmbedWidget({
   const [height, setHeight] = React.useState(400);
   React.useEffect(() => {
     function handleResize() {
-      setHeight(window.innerWidth < 640 ? 280 : 400);
+      setHeight(window.innerWidth < 640 ? 370 : 400);
     }
     handleResize();
     window.addEventListener("resize", handleResize);
