@@ -1,8 +1,13 @@
 # thirdweb Token Marketplace
 
-A modern, black-themed token marketplace and cross-chain bridge built with Next.js, React, Tailwind CSS, and the thirdweb SDK. Browse, search, and bridge tokens across multiple blockchains with a beautiful, minimal UI.
+A modern token marketplace and cross-chain bridge built with Next.js, Tailwind CSS, and the thirdweb SDK. Browse, search, and bridge tokens across multiple blockchains.
 
-![Logo](https://framerusercontent.com/images/pRWBwfXy6tUV2WWeA7yWTBUj17I.png)
+Live Demo: https://token-marketplace.thirdweb-preview.com/
+
+![Demo](https://token-marketplace.thirdweb-preview.com/demo-market.png)
+![Demo](https://token-marketplace.thirdweb-preview.com/demo-market-1.png)
+![Demo](https://token-marketplace.thirdweb-preview.com/demo-market-2.png)
+
 
 ## Features
 
@@ -17,35 +22,34 @@ A modern, black-themed token marketplace and cross-chain bridge built with Next.
 
 - Node.js (v18+ recommended)
 - Yarn or npm
+- thirdweb clientId
 
 ### Installation
 
 ```bash
 # Clone the repo
-git clone <your-repo-url>
-cd dex-app
+git clone https://github.com/thirdweb-example/token-marketplace
+cd token-marketplace
+```
 
 # Install dependencies
-yarn install # or npm install
+
+```bash
+npm install # or yarn install
 ```
 
 ### Development
 
 ```bash
-yarn dev # or npm run dev
+npm run dev # or yarn dev
 ```
 
 ### Build for Production
 
 ```bash
-yarn build # or npm run build
+npm run build # or yarn build
 ```
 
-### Lint
-
-```bash
-yarn lint # or npm run lint
-```
 
 ## Project Structure
 
