@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ConnectButton } from "thirdweb/react";
 import { client } from "@/app/client";
-import { Search } from "lucide-react";
+import { Search, Github } from "lucide-react";
 
 export default function Header() {
   return (
@@ -19,6 +19,18 @@ export default function Header() {
            
           </div>
           <div className="flex items-center space-x-4">
+            <a
+              href="https://github.com/thirdweb-example/marketplace-template/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub Repository"
+              className="flex items-center"
+            >
+              <Button variant="outline" size="lg" className="flex items-center gap-2 px-3 py-1 border-white text-white bg-transparent hover:bg-white/10">
+                <Github className="w-5 h-5" />
+                <span>GitHub</span>
+              </Button>
+            </a>
             <ConnectButton
               client={client}
               appMetadata={{

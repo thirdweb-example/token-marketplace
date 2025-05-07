@@ -305,12 +305,15 @@ export default function Home() {
       )
     : allTokens;
 
+  // Sort tokens alphabetically by name
+  const sortedTokens = filteredTokens.slice().sort((a, b) => a.name.localeCompare(b.name));
+
   // Calculate total pages
-  const totalPages = Math.max(1, Math.ceil(filteredTokens.length / routesPerPage));
+  const totalPages = Math.max(1, Math.ceil(sortedTokens.length / routesPerPage));
   
   // Get current page tokens
   const startIndex = (currentPage - 1) * routesPerPage;
-  const paginatedTokens = filteredTokens.slice(startIndex, startIndex + routesPerPage);
+  const paginatedTokens = sortedTokens.slice(startIndex, startIndex + routesPerPage);
 
   // Reset to page 1 when search term changes
   const handleSearch = (e: React.FormEvent) => {
