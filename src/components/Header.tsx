@@ -2,35 +2,45 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ConnectButton } from "thirdweb/react";
 import { client } from "@/app/client";
-import { Search, Github } from "lucide-react";
+import Image from "next/image";
 
 export default function Header() {
   return (
     <header className="border-b border-[#151515] bg-black">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-8">
-            <Link
-              href="/"
-              className="flex items-center justify-center text-2xl font-bold"
-            >
-              <h1>thirdweb</h1>
+          <div className="flex items-center space-x-4">
+            <Link href="/" className="flex items-center gap-2">
+              <Image
+                src="/thirdweb.svg"
+                alt="thirdweb"
+                width={44}
+                height={44}
+              />
+              <span className="text-xl font-semibold">Market</span>
             </Link>
-           
+
+            {/* Nav buttons */}
+            <Link href="/" className="flex items-center">
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-[#1a1a1a] text-white border-[#2a2a2a] hover:bg-[#2a2a2a]"
+              >
+                Tokens
+              </Button>
+            </Link>
+            <Link href="/nfts" className="flex items-center">
+              <Button
+                size="sm"
+                variant="outline"
+                className="bg-[#1a1a1a] text-white border-[#2a2a2a] hover:bg-[#2a2a2a]"
+              >
+                NFTs
+              </Button>
+            </Link>
           </div>
           <div className="flex items-center space-x-4">
-            <a
-              href="https://github.com/thirdweb-example/marketplace-template/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub Repository"
-              className="flex items-center"
-            >
-              <Button variant="outline" size="lg" className="flex items-center gap-2 px-3 py-1 border-white text-white bg-transparent hover:bg-white/10">
-                <Github className="w-5 h-5" />
-                <span>GitHub</span>
-              </Button>
-            </a>
             <ConnectButton
               client={client}
               appMetadata={{
