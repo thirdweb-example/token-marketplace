@@ -4,188 +4,87 @@ import { useState, useRef, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import NFTCard from "@/components/feature/NFTCard";
-import { fetchNFTs, NFT } from "@/lib/nfts";
+import { fetchNFTs, NFT, NFT_CONTRACTS, NftContract } from "@/lib/nfts";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
-const CHAINS = [
-  { key: "ethereum", label: "Ethereum" },
-  { key: "base", label: "Base" },
-  { key: "polygon", label: "Polygon" },
-];
+// Get unique chains from NFT_CONTRACTS
+const uniqueChains = Array.from(
+  new Map(
+    NFT_CONTRACTS.map((c) => [c.chainId, c.chain])
+  ).entries()
+).map(([chainId, chain]) => ({ chainId, chain }));
 
 export default function NFTsGalleryPage() {
-  const [selectedChain, setSelectedChain] = useState<string>("ethereum");
-  const [owner, setOwner] = useState<string>("");
-  const [inputOwner, setInputOwner] = useState<string>("");
-  const [showFilters, setShowFilters] = useState<boolean>(false);
-
-  // React Query – infinite NFTs
-  type FetchResponse = Awaited<ReturnType<typeof fetchNFTs>>;
-
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-    status,
-  } = useInfiniteQuery<
-    FetchResponse,
-    Error,
-    FetchResponse,
-    [string, string, string]
-  >({
-    queryKey: ["nfts", selectedChain, owner],
-    queryFn: async ({ pageParam }) => {
-      const cursor = pageParam as string | undefined;
-      const res = await fetchNFTs({
-        chain: selectedChain as any,
-        owner,
-        cursor,
-      });
-      return res;
-    },
-    initialPageParam: undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  // Intersection Observer for infinite scroll
-  const observer = useRef<IntersectionObserver>();
-
-  const lastElementRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (isFetchingNextPage) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
-          fetchNextPage();
-        }
-      });
-      if (node) observer.current.observe(node);
-    },
-    [isFetchingNextPage, hasNextPage, fetchNextPage]
+  const [selectedChainId, setSelectedChainId] = useState(
+    uniqueChains.length > 0 ? uniqueChains[0].chainId : null
   );
 
-  // Handle Apply owner filter
-  const applyOwnerFilter = (e: React.FormEvent) => {
-    e.preventDefault();
-    setOwner(inputOwner.trim());
-    // Refetch on owner change
-    refetch({ cancelRefetch: true });
-  };
-
-  const allNFTs: NFT[] = ((data as any)?.pages ?? []).flatMap(
-    (p: any) => p.nfts as NFT[]
-  );
+  const selectedChain = uniqueChains.find((c) => c.chainId === selectedChainId);
+  const collections = NFT_CONTRACTS.filter((c) => c.chainId === selectedChainId);
 
   return (
     <main className="min-h-screen bg-black text-white">
       <Header />
-
       <section className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">NFT Gallery</h1>
-
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row md:items-end gap-6 mb-8">
-          {/* Chain selector */}
-          <div>
-            <label
-              className="block text-sm font-medium mb-2"
-              htmlFor="chain-select"
-            >
-              Chain
-            </label>
-            <select
-              id="chain-select"
-              className="bg-[#121212] border border-[#1F1F1F] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring"
-              value={selectedChain}
-              onChange={(e) => setSelectedChain(e.target.value)}
-            >
-              {CHAINS.map((c) => (
-                <option key={c.key} value={c.key}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Filters dropdown */}
-          <div className="flex-1">
-            <button
-              type="button"
-              className="bg-white text-black px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-200"
-              onClick={() => setShowFilters((prev) => !prev)}
-            >
-              Filters
-            </button>
-
-            {showFilters && (
-              <form
-                onSubmit={applyOwnerFilter}
-                className="mt-4 bg-[#121212] border border-[#1F1F1F] rounded-md p-4"
-              >
-                <label
-                  className="block text-sm font-medium mb-2"
-                  htmlFor="owner-input"
-                >
-                  Owner address
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    id="owner-input"
-                    type="text"
-                    value={inputOwner}
-                    onChange={(e) => setInputOwner(e.target.value)}
-                    placeholder="0x..."
-                    className="flex-1 bg-black border border-[#1F1F1F] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-white text-black px-4 py-2 rounded-md text-sm font-semibold hover:bg-gray-200"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+        <h1 className="text-3xl font-bold mb-6">NFT Collections</h1>
+        {/* Chain dropdown */}
+        <div className="mb-8">
+          <label className="block text-sm font-medium mb-2" htmlFor="chain-select">
+            Chain
+          </label>
+          <select
+            id="chain-select"
+            className="bg-[#121212] border border-[#1F1F1F] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring"
+            value={selectedChainId ?? ''}
+            onChange={(e) => setSelectedChainId(Number(e.target.value))}
+          >
+            {uniqueChains.map(({ chainId, chain }) => (
+              <option key={chainId} value={chainId}>
+                {chain.name || `Chain #${chainId}`}
+              </option>
+            ))}
+          </select>
         </div>
-
-        {/* Gallery Grid */}
-        {status === "pending" ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {Array.from({ length: 20 }).map((_, idx) => (
-              <Skeleton key={idx} className="w-full pt-[100%]" />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {allNFTs.length === 0 ? (
-              <p className="text-gray-400 col-span-full text-center">
-                No NFTs found. Ensure your thirdweb client ID is enabled for the
-                selected chain.
-              </p>
-            ) : (
-              allNFTs.map((nft, idx) => (
-                <NFTCard
-                  key={`${nft.contract_address}_${nft.token_id}_${idx}`}
-                  nft={nft}
-                />
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Load more sentinel */}
-        <div ref={lastElementRef} className="h-10" />
-
-        {/* Fetching next page skeleton */}
-        {isFetchingNextPage && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
-            {Array.from({ length: 10 }).map((_, idx) => (
-              <Skeleton key={idx} className="w-full pt-[100%]" />
-            ))}
+        {/* Collections Grid for selected chain */}
+        {selectedChain && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
+              {typeof selectedChain.chain.icon === 'string' && selectedChain.chain.icon && (
+                <img src={selectedChain.chain.icon} alt={selectedChain.chain.name} className="w-6 h-6 rounded-full" />
+              )}
+              {selectedChain.chain.name || `Chain #${selectedChain.chainId}`}
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+              {collections.map((contract) => (
+                <Link
+                  key={contract.address}
+                  href={`/nfts/${selectedChainId}/${contract.address}`}
+                  className="block bg-[#181818] border border-[#232323] rounded-lg p-4 hover:border-white transition-colors"
+                >
+                  <div className="w-full aspect-square bg-[#222] rounded-md mb-3 flex items-center justify-center overflow-hidden">
+                    {contract.thumbnailUrl ? (
+                      <img
+                        src={contract.thumbnailUrl}
+                        alt={contract.title || contract.address}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <span className="text-gray-500 text-4xl">?</span>
+                    )}
+                  </div>
+                  <div className="font-semibold text-lg mb-1 truncate">
+                    {contract.title || contract.address}
+                  </div>
+                  <div className="text-xs text-gray-400 mb-1 truncate">
+                    {contract.type}
+                  </div>
+                  <div className="text-xs text-gray-500 truncate">
+                    {contract.address}
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </section>
