@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import Header from "@/components/Header";
-import NFTCard from "@/components/feature/NFTCard";
-import { fetchNFTs, NFT, NFT_CONTRACTS, NftContract } from "@/lib/nfts";
-import { Skeleton } from "@/components/ui/skeleton";
+import { NFT_CONTRACTS } from "@/lib/nfts";
 import Link from "next/link";
 
 // Get unique chains from NFT_CONTRACTS
