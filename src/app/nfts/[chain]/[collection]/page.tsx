@@ -120,6 +120,34 @@ export default function NFTCollectionPage() {
     setHasMore(true);
   }, [chain, collection]);
 
+  // Fetch collection metadata only once when collection/chain changes
+  useEffect(() => {
+    async function fetchCollectionMeta() {
+      setLoading(true);
+      setError(null);
+      try {
+        // Find chainId from NFT_CONTRACTS
+        const contract = NFT_CONTRACTS.find(
+          (c) => c.address.toLowerCase() === collection.toLowerCase()
+        );
+        const chainId = contract?.chainId || chain;
+        const clientId = process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID;
+        // Fetch collection metadata
+        const metaRes = await fetch(
+          `https://insight.thirdweb.com/v1/nfts/collections/${collection}?chain=${chainId}&include_stats=true&resolve_metadata_links=true&clientId=${clientId}`
+        );
+        if (!metaRes.ok) throw new Error("Failed to fetch collection metadata");
+        const meta = await metaRes.json();
+        setCollectionMeta(meta.data[0]);
+      } catch (e: any) {
+        setError(e.message || "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCollectionMeta();
+  }, [chain, collection]);
+
   // Fetch NFTs in batches and append
   useEffect(() => {
     async function fetchNFTs() {
@@ -150,46 +178,6 @@ export default function NFTCollectionPage() {
     }
     fetchNFTs();
   }, [chain, collection, page]);
-
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-      try {
-         // Find chainId from NFT_CONTRACTS
-         const contract = NFT_CONTRACTS.find(
-          (c) => c.address.toLowerCase() === collection.toLowerCase()
-        );
-        const chainId = contract?.chainId || chain;
-
-
-        const clientId = process.env.NEXT_PUBLIC_TEMPLATE_CLIENT_ID;
-        // Fetch collection metadata
-        const metaRes = await fetch(
-          `https://insight.thirdweb.com/v1/nfts/collections/${collection}?chain=${chainId}&include_stats=true&resolve_metadata_links=true&clientId=${clientId}`
-        );
-        if (!metaRes.ok) throw new Error("Failed to fetch collection metadata");
-        const meta = await metaRes.json();
-        console.log(meta);
-        setCollectionMeta(meta.data[0]);
-
-       
-        // Fetch NFTs in the collection
-        const nftsRes = await fetch(
-          `https://insight.thirdweb.com/v1/nfts/${collection}?chain=${chainId}&limit=50&include_owners=false&resolve_metadata_links=true&clientId=${clientId}`
-        );
-        if (!nftsRes.ok) throw new Error("Failed to fetch NFTs");
-        const nftsJson = await nftsRes.json();
-        console.log(nftsJson);
-        setNfts(nftsJson.data);
-      } catch (e: any) {
-        setError(e.message || "Unknown error");
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchData();
-  }, [chain, collection]);
 
   const [tab, setTab] = useState<string>("items");
 
