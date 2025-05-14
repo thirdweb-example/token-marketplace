@@ -24,7 +24,10 @@ const chainNameMap: Record<number, string> = {
 };
 
 export default function NFTCard({ nft, price, currencySymbol, listingId }: Props) {
-  console.log(nft);
+  // Defensive check for contract data
+  if (!nft.contract || typeof nft.contract.chain_id === 'undefined' || typeof nft.contract.address === 'undefined') {
+    return null;
+  }
   const href = `/nfts/${nft.contract.chain_id}/${nft.contract.address}/${nft.token_id}` +
     (listingId ? `?listing=${listingId}` : "");
   return (
