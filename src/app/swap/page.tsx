@@ -15,6 +15,7 @@ import ChartSection from "@/components/feature/ChartSection";
 import StatsSection from "@/components/feature/StatsSection";
 import AboutSection from "@/components/feature/AboutSection";
 import TransfersTable from "@/components/feature/TransfersTable";
+import ChatWidget from "@/components/feature/ChatWidget";
 
 interface TokenData {
   price: number;
@@ -408,6 +409,12 @@ export default function SwapPage() {
                 chainExplorer={chainExplorer}
                 tokenSymbol={tokenSymbol}
                 isLoading={isLoading}
+              />
+              {/* AI Chat Widget */}
+              <ChatWidget
+                chain={chain}
+                tokenAddress={tokenAddress}
+                tokenSymbol={tokenSymbol}
               />
             </div>
 
