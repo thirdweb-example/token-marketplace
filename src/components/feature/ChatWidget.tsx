@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { defineChain, type Chain } from "thirdweb";
 import { MessageCircle, X, Send } from "lucide-react";
 import { useActiveAccount, useChainMetadata } from "thirdweb/react";
+import ReactMarkdown from 'react-markdown'
+import rehypeSanitize from 'rehype-sanitize'
 
 interface Message {
   id: string;
@@ -66,26 +68,34 @@ export default function BubbleChatWidget({
     scrollToBottom();
   }, [messages]);
 
-  // Format message text with proper line breaks and links
+  // Format message text using react-markdown
   const formatMessageText = (text: string) => {
-    // Replace markdown-style links with actual links
-    const linkRegex = /\[(.*?)\]\((.*?)\)/g;
-    const formattedText = text.replace(
-      linkRegex,
-      '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">$1</a>'
+    return (
+      <ReactMarkdown 
+        rehypePlugins={[rehypeSanitize]}
+        components={{
+          // Override link rendering to open in new tab
+          a: ({node, ...props}) => (
+            <a 
+              {...props} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-400 hover:underline"
+            />
+          ),
+          // Style bold text
+          strong: ({node, ...props}) => (
+            <strong {...props} className="font-bold" />
+          ),
+          // Add spacing for paragraphs
+          p: ({node, ...props}) => (
+            <p {...props} className="mb-2 last:mb-0" />
+          )
+        }}
+      >
+        {text}
+      </ReactMarkdown>
     );
-
-    // Replace **text** with bold
-    const boldRegex = /\*\*(.*?)\*\*/g;
-    const withBold = formattedText.replace(boldRegex, "<strong>$1</strong>");
-
-    // Split by newlines and wrap each line
-    return withBold.split("\n").map((line, i) => (
-      <React.Fragment key={i}>
-        {i > 0 && <br />}
-        <span dangerouslySetInnerHTML={{ __html: line }} />
-      </React.Fragment>
-    ));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

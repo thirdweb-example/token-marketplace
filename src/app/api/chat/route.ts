@@ -19,35 +19,32 @@ const client = createThirdwebClient({
 export async function POST(request: Request) {
   try {
     const { message, chainId, sessionId, chainName, tokenAddress, walletAddress } = await request.json()
-    console.log(message, chainId, sessionId, chainName, tokenAddress, walletAddress)
 
-    if (!message || !chainId) {
-      return NextResponse.json(
-        { error: "Message and chainId are required" },
-        { status: 400 }
-      )
-    }
+     if (!message || !chainId) {
+       return NextResponse.json(
+         { error: "Message and chainId are required" },
+         { status: 400 }
+       )
+     }
 
-    const chain = defineChain(Number(chainId))
+     const chain = defineChain(Number(chainId))
 
-    // Include context in the message itself
-    const contextualizedMessage = `Context: You are helping with questions about the ${tokenAddress} token on ${chainName}. 
-User question: ${message}`
-    console.log(contextualizedMessage)
-    const response = await Nebula.chat({
-      client,
-      message: contextualizedMessage,
-      sessionId,
-      contextFilter: {
-        chains: [chain],
-        contractAddresses: [tokenAddress],
-        walletAddresses: [walletAddress],
-      },
-    })
+     // Include context in the message itself
+     const contextualizedMessage = `Context: You are helping with questions about the ${tokenAddress} token on ${chainName}. 
+ User question: ${message}`
+     const response = await Nebula.chat({
+       client,
+       message: contextualizedMessage,
+       sessionId,
+       contextFilter: {
+         chains: [chain],
+         contractAddresses: [tokenAddress],
+         walletAddresses: [walletAddress],
+       },
+     })
 
-    // Extract sessionId from response for future use
-    const newSessionId = response.sessionId
-    console.log(response.message)
+     // Extract sessionId from response for future use
+     const newSessionId = response.sessionId
     return NextResponse.json({ 
       message: response.message,
       sessionId: newSessionId
