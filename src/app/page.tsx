@@ -3,7 +3,6 @@
 import React from "react"
 import { useState } from "react"
 import { Bridge, NATIVE_TOKEN_ADDRESS } from "thirdweb"
-import type { Route } from "thirdweb/bridge"
 import { client } from "./client"
 import { useQuery } from "@tanstack/react-query"
 
@@ -181,12 +180,16 @@ const useTokensData = () => {
   return useQuery({
     queryKey: ['tokens'],
     queryFn: async () => {
-      const result = await Bridge.routes({ client, limit: 100000 });
-      console.log(`Fetched ${result.length} routes from bridge API`);
+      // Get tokens directly using Bridge.tokens
+      const tokens = await Bridge.tokens({
+        client,
+        limit: 1000,
+      });
+      console.log(`Fetched ${tokens.length} tokens from bridge API`);
 
+      // Create unique tokens map to avoid duplicates
       const tokensMap = new Map();
-      for (const route of result) {
-        const token = route.destinationToken;
+      for (const token of tokens) {
         const uniqueKey = `${token.symbol.toLowerCase()}_${token.chainId}_${token.address.toLowerCase()}`;
         if (!tokensMap.has(uniqueKey)) {
           tokensMap.set(uniqueKey, token);
@@ -278,7 +281,7 @@ const useTokensData = () => {
       console.log(`Found ${sortedTokens.length} tokens with price data`);
       return sortedTokens;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     refetchOnWindowFocus: false,
     retry: 2,
   });

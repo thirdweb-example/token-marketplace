@@ -36,7 +36,7 @@
     "rehype-sanitize": "^6.0.0",
     "tailwind-merge": "^3.2.0",
     "tailwindcss-animate": "^1.0.7",
-    "thirdweb": "^5.96.6"
+    "thirdweb": "^5.102.6"
   },
   "devDependencies": {
     "@types/node": "^20",
