@@ -206,13 +206,21 @@ const useTokensData = () => {
         return acc;
       }, {});
 
-      // Split chain groups into batches of max 5 chains
+      // Split chain groups into batches with much smaller size
       const chainIds = Object.keys(tokensByChain);
       const batches = [];
-      for (let i = 0; i < chainIds.length; i += 5) {
-        const batchChains = chainIds.slice(i, i + 5);
-        const batchTokens = batchChains.flatMap(chainId => tokensByChain[chainId]);
-        batches.push({ chains: batchChains.map(Number), tokens: batchTokens });
+      const MAX_TOKENS_PER_BATCH = 30;
+      const MAX_CHAINS_PER_BATCH = 5;
+
+      for (let i = 0; i < chainIds.length; i += MAX_CHAINS_PER_BATCH) {
+        const batchChains = chainIds.slice(i, i + MAX_CHAINS_PER_BATCH);
+        const allTokensInChains = batchChains.flatMap(chainId => tokensByChain[chainId]);
+        
+        // Further split tokens into smaller batches
+        for (let j = 0; j < allTokensInChains.length; j += MAX_TOKENS_PER_BATCH) {
+          const batchTokens = allTokensInChains.slice(j, j + MAX_TOKENS_PER_BATCH);
+          batches.push({ chains: batchChains.map(Number), tokens: batchTokens });
+        }
       }
 
       const allInsightData: any[] = [];
@@ -227,6 +235,9 @@ const useTokensData = () => {
 
         try {
           const response = await fetch(insightUrl);
+          if (!response.ok) {
+            throw new Error(`API responded with status: ${response.status}`);
+          }
           const data = await response.json();
           return data.data || [];
         } catch (err) {
@@ -235,11 +246,19 @@ const useTokensData = () => {
         }
       });
 
-      const results = await Promise.allSettled(batchPromises);
-
-      for (const result of results) {
-        if (result.status === 'fulfilled') {
-          allInsightData.push(...result.value);
+      // Use Promise.all instead of Promise.allSettled for better error handling
+      // and limit concurrency to avoid overwhelming the API
+      const results = [];
+      const CONCURRENCY_LIMIT = 5;
+      
+      for (let i = 0; i < batchPromises.length; i += CONCURRENCY_LIMIT) {
+        const batchGroup = batchPromises.slice(i, i + CONCURRENCY_LIMIT);
+        const batchResults = await Promise.allSettled(batchGroup);
+        
+        for (const result of batchResults) {
+          if (result.status === 'fulfilled') {
+            allInsightData.push(...result.value);
+          }
         }
       }
 

@@ -124,6 +124,7 @@ async function handleCompletedTransaction(data: any) {
         contract,
         to: sender,
         quantityInWei: toWei('1'),
+        from: "0xb9192A73074Cf6366Ca3A02eb28c06aaA69cA72A",
       });
       
       // Enqueue the transaction to be processed by the server wallet
