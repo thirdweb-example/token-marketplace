@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ConnectButton } from "thirdweb/react";
 import { client } from "@/app/client";
 import { Search, Github } from "lucide-react";
+import RewardTokenDisplay from "@/components/feature/RewardTokenDisplay";
 
 export default function Header() {
   return (
@@ -19,6 +20,7 @@ export default function Header() {
            
           </div>
           <div className="flex items-center space-x-4">
+            <RewardTokenDisplay />
             <a
               href="https://github.com/thirdweb-example/token-marketplace"
               target="_blank"
