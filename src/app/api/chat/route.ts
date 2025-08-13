@@ -61,8 +61,9 @@ export async function POST(request: Request) {
      const data = await response.json()
      
      return NextResponse.json({ 
-       message: data.message || data.content || data.response,
-       sessionId: sessionId // Keep the existing sessionId since the new API doesn't return one
+       message: data.message,
+       sessionId: data.session_id || sessionId,
+       requestId: data.request_id,
      })
   } catch (error) {
     console.error("Error in chat API:", error)
