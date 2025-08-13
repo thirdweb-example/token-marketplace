@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
-import { Nebula } from "thirdweb/ai"
 import { defineChain } from "thirdweb"
-import { createThirdwebClient } from "thirdweb"
 
 // Increase route handler timeout to 2 minutes
 export const runtime = 'edge' // 'nodejs' is limited to 10s
@@ -10,11 +8,6 @@ export const maxDuration = 120 // This is in seconds
 if (!process.env.SECRET_KEY) {
   throw new Error("SECRET_KEY is not set in environment variables")
 }
-
-// Create a client with the secret key
-const client = createThirdwebClient({
-  secretKey: process.env.SECRET_KEY,
-})
 
 export async function POST(request: Request) {
   try {
@@ -27,28 +20,50 @@ export async function POST(request: Request) {
        )
      }
 
-     const chain = defineChain(Number(chainId))
+     // Ensure SECRET_KEY is available
+     if (!process.env.SECRET_KEY) {
+       return NextResponse.json(
+         { error: "SECRET_KEY is not configured" },
+         { status: 500 }
+       )
+     }
 
      // Include context in the message itself
      const contextualizedMessage = `Context: You are helping with questions about the ${tokenAddress} token on ${chainName}. 
  User question: ${message}`
-     const response = await Nebula.chat({
-       client,
-       message: contextualizedMessage,
-       sessionId,
-       contextFilter: {
-         chains: [chain],
-         contractAddresses: [tokenAddress],
-         walletAddresses: [walletAddress],
+
+     const response = await fetch("https://api.thirdweb-dev.com/ai/chat", {
+       method: "POST",
+       headers: {
+         "x-secret-key": process.env.SECRET_KEY,
+         "Content-Type": "application/json",
        },
+       body: JSON.stringify({
+         messages: [
+           {
+             role: "user",
+             content: contextualizedMessage,
+           },
+         ],
+         context: {
+           chain_ids: [Number(chainId)],
+           from: walletAddress,
+           contract_addresses: tokenAddress ? [tokenAddress] : undefined,
+         },
+         stream: false,
+       }),
      })
 
-     // Extract sessionId from response for future use
-     const newSessionId = response.sessionId
-    return NextResponse.json({ 
-      message: response.message,
-      sessionId: newSessionId
-    })
+     if (!response.ok) {
+       throw new Error(`API request failed: ${response.status}`)
+     }
+
+     const data = await response.json()
+     
+     return NextResponse.json({ 
+       message: data.message || data.content || data.response,
+       sessionId: sessionId // Keep the existing sessionId since the new API doesn't return one
+     })
   } catch (error) {
     console.error("Error in chat API:", error)
     return NextResponse.json(
