@@ -32,33 +32,42 @@ export async function POST(request: Request) {
      const contextualizedMessage = `Context: You are helping with questions about the ${tokenAddress} token on ${chainName}. 
  User question: ${message}`
 
-     const response = await fetch("https://api.thirdweb-dev.com/ai/chat", {
-       method: "POST",
-       headers: {
-         "x-secret-key": process.env.SECRET_KEY,
-         "Content-Type": "application/json",
-       },
-       body: JSON.stringify({
-         messages: [
-           {
-             role: "user",
-             content: contextualizedMessage,
-           },
-         ],
-         context: {
-           chain_ids: [Number(chainId)],
-           from: walletAddress,
-           contract_addresses: tokenAddress ? [tokenAddress] : undefined,
+     let data
+     try {
+       const response = await fetch("https://api.thirdweb.com/ai/chat", {
+         method: "POST",
+         headers: {
+           "x-secret-key": process.env.SECRET_KEY,
+           "Content-Type": "application/json",
          },
-         stream: false,
-       }),
-     })
+         body: JSON.stringify({
+           messages: [
+             {
+               role: "user",
+               content: contextualizedMessage,
+             },
+           ],
+           context: {
+             chain_ids: [Number(chainId)],
+             from: walletAddress,
+             contract_addresses: tokenAddress ? [tokenAddress] : undefined,
+           },
+           stream: false,
+         }),
+       })
 
-     if (!response.ok) {
-       throw new Error(`API request failed: ${response.status}`)
+       if (!response.ok) {
+         throw new Error(`API request failed: ${response.status}`)
+       }
+
+       data = await response.json()
+     } catch (fetchError) {
+       console.error("Error fetching from AI API:", fetchError)
+       return NextResponse.json(
+         { error: "Failed to communicate with AI service" },
+         { status: 503 }
+       )
      }
-
-     const data = await response.json()
      
      return NextResponse.json({ 
        message: data.message,
